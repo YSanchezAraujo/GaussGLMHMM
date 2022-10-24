@@ -1,4 +1,14 @@
 
+function normalize_z(x)
+    Z = sum(x)
+    return x ./ Z,  Z
+end
+
+normalize_1o(x) = x ./ sum(x)
+add_dim(x) = reshape(x, (size(x)..., 1))
+drop_dim(a) = dropdims(a, dims = (findall(size(a) .== 1)...,))
+
+
 function init_estimates_kmeans(data, K, max_iter)
     R = kmeans(add_dim(data)', K; maxiter=max_iter)
     unique_assignments = sort(unique(R.assignments))
