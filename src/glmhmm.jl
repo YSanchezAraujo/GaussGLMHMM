@@ -2,6 +2,7 @@ using Distributions
 using LinearAlgebra
 using LogExpFunctions
 
+include("utils.jl")
 
 struct forward_object
     α::Matrix
