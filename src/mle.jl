@@ -11,7 +11,7 @@ dists: 1-d array of k Distribution objects w/o any parameters
       example: [Normal, Normal]
       if the number of latent variables being fit to the data is 2
 """
-function fit_hmm_em(data, dists; tol=1e-4, max_iter=250)
+function fit_hmm_em(y, X, dists; tol=1e-4, max_iter=250)
     if size(data, 2) > 1
         throw(DomainError("n-dimensional samples not supported"))
     end
@@ -21,14 +21,14 @@ function fit_hmm_em(data, dists; tol=1e-4, max_iter=250)
     # using k-means as an first guess
     init_pi, dist_params, A, init_mu, init_sd = init_estimates_kmeans(y, K, max_iter)
     
-    W_no_state = zeros(
+    #W_no_state = zeros(
     
     # construct poseterior object       
     pos = posterior_object(init_mu, init_sd, zeros(T, K), init_pi, A)
     
     ll, ll_change, ll_iter = 1e7, 1, zeros(max_iter)
     
-    dm = data_models(data, dists, zeros(T, K)
+    dm = data_models(X, y, dists, zeros(T, K))
       
     compute_likelihoods!(dm, dist_params)
     
