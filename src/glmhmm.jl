@@ -102,7 +102,12 @@ function compute_posteriors(fobj, bobj, dm_obj)
     π = γ[1, :] ./ sum(γ[1, :])
     
     @inbounds for t in 1:T-1
-        ξ[:, :, t] = (bobj.Ψ .* (fobj.α[t, :] * (dm_obj.L[t+1, :] .* bobj.β[t+1, :])')) ./ fobj.Z[t+1]
+        lik_beta = dm_obj.L[t+1, :] .* bobj.β[t+1, :]
+        
+        alpha = fobj.fobj.α[t, :]
+        
+        ξ[:, :, t] = (fobj.Ψ * (alpha * lik_beta')) ./ fobj.Z[t+1]
+            
     end
     
     ξ_NT = drop_dim(sum(ξ; dims=(3, 2)))
