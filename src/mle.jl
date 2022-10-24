@@ -17,9 +17,17 @@ function fit_hmm_em(y, X, dists; tol=1e-4, max_iter=250)
     end
     
     T, K = size(data, 1), length(dists)
+            
+    init_mu = mean(y) .+ rand(K)
+            
+    init_sd = std(y) .+ rand(K)
+            
+    init_pi = ones(K) .* 0.5
+            
+    A = ones(K, K) .* 0.5
     
     # using k-means as an first guess
-    init_pi, dist_params, A, init_mu, init_sd = init_estimates_kmeans(y, K, max_iter)
+    #init_pi, dist_params, A, init_mu, init_sd = init_estimates_kmeans(y, K, max_iter)
     
     #W_no_state = zeros(
     
