@@ -44,6 +44,7 @@ end
 
 
 struct data_models
+    X::Matrix
     y::Vector
     ϕ::Vector
     L::Matrix
