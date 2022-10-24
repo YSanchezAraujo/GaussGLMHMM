@@ -26,7 +26,7 @@ function fit_hmm_em(data, dists; tol=1e-4, max_iter=250)
     # construct poseterior object       
     pos = posterior_object(init_mu, init_sd, zeros(T, K), init_pi, A)
     
-    ll, ll_change = 1e7, 1
+    ll, ll_change, ll_iter = 1e7, 1, zeros(max_iter)
     
     dm = data_models(data, dists, zeros(T, K)
       
@@ -52,11 +52,11 @@ function fit_hmm_em(data, dists; tol=1e-4, max_iter=250)
         pos = compute_posteriors(f_msg, b_msg, dm)
       
         # get current log-likelihood
-        ll_cur = sum(log.(f_msg.Z))
+        ll_iter[m] = sum(log.(f_msg.Z))
         
-        ll_change = abs.(ll - ll_cur)
+        ll_change = abs.(ll - ll_iter[m])
       
-        ll = ll_cur
+        ll = ll_iter[m]
       
         dist_params = [(pos.μ[k], pos.σ[k]) for k in 1:K]
       
@@ -66,5 +66,5 @@ function fit_hmm_em(data, dists; tol=1e-4, max_iter=250)
       
         update_backward_message!(b_msg, pos)
     end
-    return pos, f_msg, b_msg, dm, ll
+    return pos, f_msg, b_msg, dm, ll_iter
 end
