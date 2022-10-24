@@ -26,9 +26,9 @@ function fit_hmm_em(data, dists; tol=1e-4, max_iter=250)
     # construct poseterior object       
     pos = posterior_object(init_mu, init_sd, zeros(T, K), init_pi, A)
     
-    ll, ll_change = 0, 1
+    ll, ll_change = 1e7, 1
     
-    dm = data_models(data, dists, zeros(T, K))
+    dm = data_models(data, dists, zeros(T, K)
       
     compute_likelihoods!(dm, dist_params)
     
@@ -46,7 +46,7 @@ function fit_hmm_em(data, dists; tol=1e-4, max_iter=250)
         forward_message!(f_msg, dm)
       
         # run messages backwards
-        backward_message!(b_msg, dm)
+        backward_message!(b_msg, dm, f_msg.Ψ)
       
         # compute posterior quantities
         pos = compute_posteriors(f_msg, b_msg, dm)
