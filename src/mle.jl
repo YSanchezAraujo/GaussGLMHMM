@@ -26,23 +26,16 @@ function fit_hmm_em(y, X, dists; tol=1e-4, max_iter=250)
             
     A = ones(K, K) .* 0.5
     
-    # using k-means as an first guess
-    #init_pi, dist_params, A, init_mu, init_sd = init_estimates_kmeans(y, K, max_iter)
-    
-    #W_no_state = zeros(
-            
     init_W = (X'X \ X'y) .+ rand(size(X, 2), K)
     
     # construct poseterior object       
     pos = posterior_object(init_W, init_mu, init_sd, zeros(T, K), init_pi, A)
-            
-    dist_params = [(init_mu[k], init_sd[k]) for k in 1:K]        
-    
+                
     ll, ll_change, ll_iter = 1e7, 1, zeros(max_iter)
     
     dm = data_models(X, y, dists, zeros(T, K))
       
-    compute_likelihoods!(dm, dist_params)
+    compute_likelihoods!(dm, pos.W, pos.σ)
     
     f_msg = forward_object(zeros(T, K), init_pi, A, zeros(T))
       
@@ -69,10 +62,8 @@ function fit_hmm_em(y, X, dists; tol=1e-4, max_iter=250)
         ll_change = abs.(ll - ll_iter[m])
       
         ll = ll_iter[m]
-      
-        dist_params = [(pos.μ[k], pos.σ[k]) for k in 1:K]
-      
-        compute_likelihoods!(dm, dist_params)
+            
+        compute_likelihoods!(dm, pos.W, pos.σ)
       
         update_forward_message!(f_msg, pos)
       
