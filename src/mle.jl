@@ -12,7 +12,7 @@ dists: 1-d array of k Distribution objects w/o any parameters
       if the number of latent variables being fit to the data is 2
 """
 function fit_hmm_em(y, X, dists; tol=1e-4, max_iter=250)
-    if size(data, 2) > 1
+    if size(y, 2) > 1
         throw(DomainError("n-dimensional samples not supported"))
     end
     
