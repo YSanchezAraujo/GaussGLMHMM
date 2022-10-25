@@ -16,7 +16,7 @@ function fit_hmm_em(y, X, dists; tol=1e-4, max_iter=250)
         throw(DomainError("n-dimensional samples not supported"))
     end
     
-    T, K = size(data, 1), length(dists)
+    T, K = size(y, 1), length(dists)
             
     init_mu = mean(y) .+ rand(K)
             
