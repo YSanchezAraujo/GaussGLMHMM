@@ -50,25 +50,30 @@ struct data_models
     L::Matrix
 end
 
-function update_likelihood_params!(dm_obj, params)
-    for i in 1:length(dm_obj.ϕ)
-        dm_obj.ϕ[i] = dm_obj.ϕ[i](params[i]...)
-    end
-end
+# need a better way to do this    
+# function update_likelihood_params!(dm_obj, params)
+#     for i in 1:length(dm_obj.ϕ)
+#         dm_obj.ϕ[i] = dm_obj.ϕ[i](params[i]...)
+#     end
+# end
 
-function compute_likelihoods!(dm_obj, params)
+# same here
+function compute_likelihoods!(dm_obj, W)
     T = size(dm_obj.y, 1)
     K = length(dm_obj.ϕ)
+        
+    XW = dm_obj.X * W
+        
     @inbounds for t in 1:T
         for k in 1:K
-            dm_obj.L[t, k] = pdf(dm_obj.ϕ[k](params[k]...), dm_obj.y[t])
+            pdist = dm_obj.ϕ[k](XW[t, k], sig2[t, k])
+            dm_obj.L[t, k] = pdf(pdist, dm_obj.y[t])
         end
     end
 end
 
 struct posterior_object
     W::Matrix
-    μ::Vector
     σ::Vector
     γ::Matrix
     π::Vector
@@ -79,7 +84,7 @@ function compute_posteriors(fobj, bobj, dm_obj)
     T = size(dm_obj.y, 1)
     K = length(dm_obj.ϕ)
     γ = fobj.α .* bobj.β
-    W = zeros(T, K)
+    W = zeros(size(dm_obj.X, 2), K)
     
     for k in 1:K
         p_z = diagm(γ[:, k] ./ sum(γ[:, k]))
@@ -90,7 +95,7 @@ function compute_posteriors(fobj, bobj, dm_obj)
     
     μ = dm_obj.X * W
         
-    y_minus_μ = add_dim(y) .- add_dim(μ)'
+    y_minus_μ = dm_obj.y .- μ
         
     σ2, ξ = zeros(K), zeros(K, K, T)
         
@@ -104,7 +109,7 @@ function compute_posteriors(fobj, bobj, dm_obj)
     @inbounds for t in 1:T-1
         lik_beta = dm_obj.L[t+1, :] .* bobj.β[t+1, :]
         
-        alpha = fobj.fobj.α[t, :]
+        alpha = fobj.α[t, :]
         
         ξ[:, :, t] = (fobj.Ψ * (alpha * lik_beta')) ./ fobj.Z[t+1]
             
@@ -114,5 +119,5 @@ function compute_posteriors(fobj, bobj, dm_obj)
     
     ξ = drop_dim(sum(ξ; dims=3)) ./ ξ_NT
     
-    return posterior_object(W, μ, sqrt.(σ2), γ, π, ξ)
+    return posterior_object(W, sqrt.(σ2), γ, π, ξ)
 end
