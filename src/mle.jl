@@ -30,9 +30,13 @@ function fit_hmm_em(y, X, dists; tol=1e-4, max_iter=250)
     #init_pi, dist_params, A, init_mu, init_sd = init_estimates_kmeans(y, K, max_iter)
     
     #W_no_state = zeros(
+            
+    init_W = (X'X \ X'y) .+ rand(size(X, 2), K)
     
     # construct poseterior object       
-    pos = posterior_object(init_mu, init_sd, zeros(T, K), init_pi, A)
+    pos = posterior_object(init_W, init_mu, init_sd, zeros(T, K), init_pi, A)
+            
+    dist_params = [(init_mu[k], init_sd[k]) for k in 1:K]        
     
     ll, ll_change, ll_iter = 1e7, 1, zeros(max_iter)
     
@@ -42,7 +46,7 @@ function fit_hmm_em(y, X, dists; tol=1e-4, max_iter=250)
     
     f_msg = forward_object(zeros(T, K), init_pi, A, zeros(T))
       
-    b_msg = backward_object(zeros(T, K), A) 
+    b_msg = backward_object(zeros(T, K)) 
     
     for m in 1:max_iter
         if ll_change < tol
