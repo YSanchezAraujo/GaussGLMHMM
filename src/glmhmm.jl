@@ -82,7 +82,7 @@ function compute_posteriors(fobj, bobj, dm_obj)
     W = zeros(T, K)
     
     for k in 1:K
-        p_z = diagm(γ ./ sum(γ[:, k]))
+        p_z = diagm(γ[:, k] ./ sum(γ[:, k]))
         X_proj = dm_obj.X' * p_z * dm_obj.X
         y_proj = dm_obj.X' * p_z * dm_obj.y
         W[:, k] = X_proj \ y_proj
