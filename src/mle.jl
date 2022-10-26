@@ -2,7 +2,6 @@
 include("/utils.jl")
 include("/glmhmm.jl")
 
-using Clustering
 
 """
 inputs: \n
@@ -18,7 +17,7 @@ function fit_hmm_em(y, X, dists; tol=1e-4, max_iter=250)
     
     T, K = size(y, 1), length(dists)
             
-    init_mu = mean(y) .+ rand(K)
+    init_mu = repeat([mean(y)], T) .+ rand(1, K) .+ rand(T)
             
     init_sd = std(y) .+ rand(K)
             
@@ -31,7 +30,7 @@ function fit_hmm_em(y, X, dists; tol=1e-4, max_iter=250)
     # construct poseterior object       
     pos = posterior_object(init_W, init_mu, init_sd, zeros(T, K), init_pi, A)
                 
-    ll, ll_change, ll_iter = 1e7, 1, zeros(max_iter)
+    ll, ll_change, ll_iter = 1e7, 1, fill(NaN, max_iter)
     
     dm = data_models(X, y, dists, zeros(T, K))
       
@@ -67,7 +66,6 @@ function fit_hmm_em(y, X, dists; tol=1e-4, max_iter=250)
       
         update_forward_message!(f_msg, pos)
       
-        update_backward_message!(b_msg, pos)
     end
     return pos, f_msg, b_msg, dm, ll_iter
 end

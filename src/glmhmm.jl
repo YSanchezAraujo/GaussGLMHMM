@@ -54,7 +54,7 @@ end
 # same here
 function compute_likelihoods!(dm_obj, μ, σ)
     T = size(dm_obj.y, 1)
-    K = length(dm_obj.ϕ
+    K = length(dm_obj.ϕ)
         
     for k in 1:K
         pdist = dm_obj.ϕ[k].(μ[:, k], σ[k])
@@ -75,6 +75,7 @@ function compute_posteriors(fobj, bobj, dm_obj)
     T = size(dm_obj.y, 1)
     K = length(dm_obj.ϕ)
     γ = fobj.α .* bobj.β
+    γ = γ ./ sum(γ; dims=2)
     W = zeros(size(dm_obj.X, 2), K)
     
     for k in 1:K
