@@ -50,30 +50,21 @@ struct data_models
     L::Matrix
 end
 
-# need a better way to do this    
-# function update_likelihood_params!(dm_obj, params)
-#     for i in 1:length(dm_obj.ϕ)
-#         dm_obj.ϕ[i] = dm_obj.ϕ[i](params[i]...)
-#     end
-# end
 
 # same here
-function compute_likelihoods!(dm_obj, W)
+function compute_likelihoods!(dm_obj, μ, σ)
     T = size(dm_obj.y, 1)
-    K = length(dm_obj.ϕ)
+    K = length(dm_obj.ϕ
         
-    XW = dm_obj.X * W
-        
-    @inbounds for t in 1:T
-        for k in 1:K
-            pdist = dm_obj.ϕ[k](XW[t, k], sig2[t, k])
-            dm_obj.L[t, k] = pdf(pdist, dm_obj.y[t])
-        end
+    for k in 1:K
+        pdist = dm_obj.ϕ[k].(μ[:, k], σ[k])
+        dm_obj.L[:, k] = pdf.(pdist, dm_obj.y)
     end
 end
 
 struct posterior_object
     W::Matrix
+    μ::Matrix 
     σ::Vector
     γ::Matrix
     π::Vector
@@ -93,7 +84,7 @@ function compute_posteriors(fobj, bobj, dm_obj)
         W[:, k] = X_proj \ y_proj
     end
     
-    μ = dm_obj.X * W
+    μ = dm_obj.X * W # we know this is a matrix
         
     y_minus_μ = dm_obj.y .- μ
         
@@ -119,5 +110,5 @@ function compute_posteriors(fobj, bobj, dm_obj)
     
     ξ = drop_dim(sum(ξ; dims=3)) ./ ξ_NT
     
-    return posterior_object(W, sqrt.(σ2), γ, π, ξ)
+    return posterior_object(W, μ, sqrt.(σ2), γ, π, ξ)
 end
