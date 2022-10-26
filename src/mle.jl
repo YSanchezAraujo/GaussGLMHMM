@@ -35,7 +35,7 @@ function fit_hmm_em(y, X, dists; tol=1e-4, max_iter=250)
     
     dm = data_models(X, y, dists, zeros(T, K))
       
-    compute_likelihoods!(dm, pos.W, pos.σ)
+    compute_likelihoods!(dm, pos.μ, pos.σ)
     
     f_msg = forward_object(zeros(T, K), init_pi, A, zeros(T))
       
@@ -63,7 +63,7 @@ function fit_hmm_em(y, X, dists; tol=1e-4, max_iter=250)
       
         ll = ll_iter[m]
             
-        compute_likelihoods!(dm, pos.W, pos.σ)
+        compute_likelihoods!(dm, pos.μ, pos.σ)
       
         update_forward_message!(f_msg, pos)
       
